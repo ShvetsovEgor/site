@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор стоимости iPhone</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0a84ff;
+            --primary-dark: #0066cc;
+            --background: #121212;
+            --surface: #1e1e1e;
+            --surface-light: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #ff375f;
+            --success: #30d158;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at 25% 25%, rgba(10, 132, 255, 0.1) 0%, transparent 50%);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            flex: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        header::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            margin: 20px auto 0;
+            border-radius: 2px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .calculator {
+            background-color: var(--surface);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+            position: relative;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: 500;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        select, input {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--surface-light);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            appearance: none;
+            outline: none;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.2);
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 18px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+            box-shadow: 0 4px 15px rgba(10, 132, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(10, 132, 255, 0.4);
+        }
+
+        button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: rotate(30deg);
+            transition: all 0.3s;
+        }
+
+        button:hover::after {
+            left: 100%;
+        }
+
+        .result {
+            background-color: var(--surface-light);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+            display: none;
+            border-left: 4px solid var(--primary);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .price {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--success), #5ce27f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .price-details {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .phone-models {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .phone-model {
+            background-color: var(--surface-light);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-model:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: rgba(10, 132, 255, 0.3);
+        }
+
+        .phone-model::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .phone-model:hover::before {
+            opacity: 1;
+        }
+
+        .phone-model img {
+            max-width: 100%;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        .phone-model .model-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .phone-model .model-price {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .phone-model.active {
+            background-color: rgba(10, 132, 255, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(10, 132, 255, 0.2);
+        }
+
+        .phone-model.active::before {
+            opacity: 1;
+        }
+
+        .condition-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+        }
+
+        .condition-option input {
+            display: none;
+        }
+
+        .condition-option label {
+            display: block;
+            padding: 16px;
+            background-color: var(--surface-light);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            margin-bottom: 0;
+        }
+
+        .condition-option input:checked + label {
+            background-color: rgba(10, 132, 255, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            background-color: var(--surface-light);
+            padding: 12px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature input {
+            width: auto;
+            margin-right: 12px;
+            accent-color: var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 30px 15px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .calculator {
+                padding: 30px;
+            }
+
+            .phone-models {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+
+            .condition-options, .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Калькулятор стоимости iPhone</h1>
+            <p class="subtitle">Узнайте точную стоимость вашего iPhone за минуту</p>
+        </header>
+
+        <div class="calculator">
+            <form id="phoneCalculator">
+                <div class="form-group">
+                    <label>Модель iPhone</label>
+                    <div class="phone-models" id="phoneModels">
+                        <!-- Модели будут загружаться динамически -->
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Объем памяти</label>
+                    <select id="storage" required>
+                        <option value="">Выберите объем памяти</option>
+                        <option value="64">64 ГБ</option>
+                        <option value="128">128 ГБ</option>
+                        <option value="256">256 ГБ</option>
+                        <option value="512">512 ГБ</option>
+                        <option value="1024">1 ТБ</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Состояние телефона</label>
+                    <div class="condition-options">
+                        <div class="condition-option">
+                            <input type="radio" name="condition" id="condition-new" value="new" required>
+                            <label for="condition-new">Как новый</label>
+                        </div>
+                        <div class="condition-option">
+                            <input type="radio" name="condition" id="condition-good" value="good">
+                            <label for="condition-good">Хорошее</label>
+                        </div>
+                        <div class="condition-option">
+                            <input type="radio" name="condition" id="condition-average" value="average">
+                            <label for="condition-average">Среднее</label>
+                        </div>
+                        <div class="condition-option">
+                            <input type="radio" name="condition" id="condition-bad" value="bad">
+                            <label for="condition-bad">Плохое</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Цвет</label>
+                    <select id="color" required>
+                        <option value="">Выберите цвет</option>
+                        <option value="black">Черный</option>
+                        <option value="white">Белый</option>
+                        <option value="silver">Серебристый</option>
+                        <option value="gold">Золотой</option>
+                        <option value="blue">Синий</option>
+                        <option value="purple">Фиолетовый</option>
+                        <option value="red">Красный</option>
+                        <option value="green">Зеленый</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Дополнительные параметры</label>
+                    <div class="features">
+                        <div class="feature">
+                            <input type="checkbox" id="originalBox" value="1">
+                            <label for="originalBox">Оригинальная коробка</label>
+                        </div>
+                        <div class="feature">
+                            <input type="checkbox" id="charger" value="1">
+                            <label for="charger">Зарядное устройство</label>
+                        </div>
+                        <div class="feature">
+                            <input type="checkbox" id="warranty" value="1">
+                            <label for="warranty">Гарантия Apple</label>
+                        </div>
+                        <div class="feature">
+                            <input type="checkbox" id="scratches" value="-1">
+                            <label for="scratches">Есть царапины</label>
+                        </div>
+                        <div class="feature">
+                            <input type="checkbox" id="cracks" value="-1">
+                            <label for="cracks">Есть трещины</label>
+                        </div>
+                        <div class="feature">
+                            <input type="checkbox" id="batteryIssue" value="-1">
+                            <label for="batteryIssue">Проблемы с батареей</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit">
+                    <span>Рассчитать стоимость</span>
+                </button>
+
+                <div class="result" id="result">
+                    <h3>Оценочная стоимость вашего iPhone:</h3>
+                    <div class="price" id="calculatedPrice">0 ₽</div>
+                    <div class="price-details" id="priceDetails">
+                        Расчет основан на текущих рыночных данных и состоянии устройства
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        © 2023 Калькулятор стоимости iPhone. Все права защищены.
+    </footer>
+
+    <script>
+        // База данных моделей iPhone
+        const iphoneModels = [
+            {name: "iPhone 15 Pro Max", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-15-pro-max-5209839-4358530.png", basePrice: 129990},
+            {name: "iPhone 15 Pro", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-15-pro-5209838-4358529.png", basePrice: 109990},
+            {name: "iPhone 15 Plus", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-15-plus-5209836-4358527.png", basePrice: 99990},
+            {name: "iPhone 15", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-15-5209835-4358526.png", basePrice: 89990},
+            {name: "iPhone 14 Pro Max", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-14-pro-max-5209834-4358525.png", basePrice: 109990},
+            {name: "iPhone 14 Pro", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-14-pro-5209833-4358524.png", basePrice: 89990},
+            {name: "iPhone 14 Plus", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-14-plus-5209832-4358523.png", basePrice: 79990},
+            {name: "iPhone 14", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-14-5209831-4358522.png", basePrice: 69990},
+            {name: "iPhone 13 Pro Max", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-13-pro-max-5209829-4358520.png", basePrice: 89990},
+            {name: "iPhone 13 Pro", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-13-pro-5209828-4358519.png", basePrice: 79990},
+            {name: "iPhone 13", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-13-5209826-4358517.png", basePrice: 59990},
+            {name: "iPhone 13 mini", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-13-mini-5209825-4358516.png", basePrice: 54990},
+            {name: "iPhone 12 Pro Max", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-12-pro-max-5209824-4358515.png", basePrice: 69990},
+            {name: "iPhone 12 Pro", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-12-pro-5209823-4358514.png", basePrice: 59990},
+            {name: "iPhone 12", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-12-5209821-4358512.png", basePrice: 49990},
+            {name: "iPhone 12 mini", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-12-mini-5209820-4358511.png", basePrice: 44990},
+            {name: "iPhone SE (2022)", img: "https://cdn.iconscout.com/icon/premium/png-512-thumb/iphone-se-5209819-4358510.png", basePrice: 39990}
+        ];
+
+        // Коэффициенты для расчета
+        const conditionFactors = {
+            new: 0.85,
+            good: 0.7,
+            average: 0.5,
+            bad: 0.3
+        };
+
+        const storageFactors = {
+            "64": 1.0,
+            "128": 1.15,
+            "256": 1.3,
+            "512": 1.45,
+            "1024": 1.6
+        };
+
+        const colorFactors = {
+            black: 1.0,
+            white: 1.0,
+            silver: 1.0,
+            gold: 1.05,
+            blue: 1.03,
+            purple: 1.04,
+            red: 1.02,
+            green: 1.01
+        };
+
+        const featureFactors = {
+            originalBox: 1.05,
+            charger: 1.03,
+            warranty: 1.08,
+            scratches: 0.96,
+            cracks: 0.85,
+            batteryIssue: 0.92
+        };
+
+        // Выбранная модель телефона
+        let selectedModel = null;
+
+        // Загрузка моделей iPhone при загрузке страницы
+        document.addEventListener('DOMContentLoaded', function() {
+            const phoneModelsContainer = document.getElementById('phoneModels');
+
+            iphoneModels.forEach(model => {
+                const modelElement = document.createElement('div');
+                modelElement.className = 'phone-model';
+                modelElement.innerHTML = `
+                    <img src="${model.img}" alt="${model.name}">
+                    <div class="model-name">${model.name}</div>
+                    <div class="model-price">от ${Math.round(model.basePrice/1000)} тыс. ₽</div>
+                `;
+                modelElement.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelectorAll('.phone-model').forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedModel = model;
+                });
+                phoneModelsContainer.appendChild(modelElement);
+            });
+        });
+
+        // Обработчик отправки формы
+        document.getElementById('phoneCalculator').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!selectedModel) {
+                alert('Пожалуйста, выберите модель iPhone');
+                return;
+            }
+
+            const storage = document.getElementById('storage').value;
+            if (!storage) {
+                alert('Пожалуйста, укажите объем памяти');
+                return;
+            }
+
+            const condition = document.querySelector('input[name="condition"]:checked');
+            if (!condition) {
+                alert('Пожалуйста, укажите состояние iPhone');
+                return;
+            }
+
+            const color = document.getElementById('color').value;
+            if (!color) {
+                alert('Пожалуйста, укажите цвет iPhone');
+                return;
+            }
+
+            // Расчет базовой цены
+            let price = selectedModel.basePrice * storageFactors[storage] * conditionFactors[condition.value] * colorFactors[color];
+
+            // Учет дополнительных параметров
+            document.querySelectorAll('.features input[type="checkbox"]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    price *= featureFactors[checkbox.id];
+                }
+            });
+
+            // Округление
+            price = Math.round(price / 1000) * 1000;
+
+            // Отображение результата
+            document.getElementById('calculatedPrice').textContent = price.toLocaleString('ru-RU') + ' ₽';
+
+            // Детали расчета
+            let details = `Модель: ${selectedModel.name}<br>`;
+            details += `Базовая цена: ${selectedModel.basePrice.toLocaleString('ru-RU')} ₽<br>`;
+            details += `Память: ${storage} ГБ (${Math.round((storageFactors[storage]-1)*100)}% к цене)<br>`;
+            details += `Состояние: ${condition.nextElementSibling.textContent} (${Math.round(conditionFactors[condition.value]*100)}% от цены)<br>`;
+            details += `Цвет: ${document.getElementById('color').options[document.getElementById('color').selectedIndex].text}<br>`;
+
+            const positiveFeatures = [];
+            const negativeFeatures = [];
+
+            document.querySelectorAll('.features input[type="checkbox"]:checked').forEach(checkbox => {
+                if (checkbox.value > 0) {
+                    positiveFeatures.push(checkbox.nextElementSibling.textContent);
+                } else {
+                    negativeFeatures.push(checkbox.nextElementSibling.textContent);
+                }
+            });
+
+            if (positiveFeatures.length > 0) {
+                details += `<br>Плюсы: ${positiveFeatures.join(', ')}`;
+            }
+
+            if (negativeFeatures.length > 0) {
+                details += `<br>Минусы: ${negativeFeatures.join(', ')}`;
+            }
+
+            document.getElementById('priceDetails').innerHTML = details;
+
+            // Анимация появления результата
+            const resultElement = document.getElementById('result');
+            resultElement.style.display = 'block';
+            resultElement.style.animation = 'none';
+            void resultElement.offsetWidth; // Trigger reflow
+            resultElement.style.animation = 'fadeIn 0.5s ease-out';
+
+            // Прокрутка к результату
+            resultElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
+    </script>
+</body>
+</html>
